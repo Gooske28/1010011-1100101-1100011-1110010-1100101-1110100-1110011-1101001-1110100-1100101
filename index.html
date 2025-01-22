@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" href="Data.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="author" content="Heleli Maes">
+    <meta name="description" content="Free minidatabase">
+    <meta name="keywords" content="Data">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data</title>
+
+<!--Kleur en stijl van de pagina + titel en inleiding-->
+<body style="background-color: black; color: azure;">
+    <h1 style="text-align: center; border:2px solid darkcyan;">Welcome!</h1>
+    <h3 style="text-align: center;">This is a simple minidatabase.</h3>
+
+<!-- Zoekfunctie -->
+<div style="text-align: center; margin: 20px;">
+  <input type="text" id="searchInput" placeholder="Search text..." style="padding: 5px; width: 50%;">
+  <button onclick="searchText()" style="padding: 5px;">Search</button>
+  <button onclick="resetSearch()" style="padding: 5px;">Reset</button>
+</div>
+
+<div id="textContainer">
+  <table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Link</th>
+  </tr>
+  <tr>
+    <td>00001</td>
+    <td>Test</td>
+    <td>Test</td>
+    <td><a href="https://google.com" target="_blank">Google</a></td>
+  </tr>  
+</div>
+
+<script>
+  // Container voor tekst
+  const textContainer = document.getElementById("textContainer");
+
+  // Zoekfunctie
+  function searchText() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const paragraphs = textContainer.querySelectorAll("p");
+    
+    let found = false;
+
+    // Filter de tekst
+    paragraphs.forEach(paragraph => {
+      if (paragraph.textContent.toLowerCase().includes(query)) {
+        paragraph.style.display = ""; // Toon de overeenkomende tekst
+        found = true;
+      } else {
+        paragraph.style.display = "none"; // Verberg de niet-overeenkomende tekst
+      }
+    });
+
+    if (found) {
+      alert("Search completed! Matching results are shown.");
+    } else {
+      alert("No matching results found.");
+    }
+  }
+
+  // Resetfunctie
+  function resetSearch() {
+    const paragraphs = textContainer.querySelectorAll("p");
+    paragraphs.forEach(paragraph => {
+      paragraph.style.display = ""; // Toon alle teksten
+    });
+    document.getElementById("searchInput").value = ""; // Maak het zoekveld leeg
+  }
+</script>
+
+
+
