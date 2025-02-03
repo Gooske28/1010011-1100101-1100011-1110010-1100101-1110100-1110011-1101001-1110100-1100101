@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Database</title>
+    <title>Firebase E-mail Login</title>
     <script type="module">
         // 🔹 Firebase SDK importeren
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 🔹 Firebase-configuratie (VERVANG MET JE EIGEN CONFIG!)
+        // 🔹 Firebase-configuratie (vervang met je eigen gegevens)
         const firebaseConfig = {
             apiKey: "AIzaSyBb1I4awMXcV3Z6IttlDK6jBXY6XYcsU6I",
             authDomain: "timssfoms.firebaseapp.com",
@@ -22,6 +23,48 @@
         // 🔹 Firebase initialiseren
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 🔹 Gebruiker registreren
+        window.registerUser = async function() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                alert('Registratie succesvol!');
+            } catch (error) {
+                alert('Fout bij registratie: ' + error.message);
+            }
+        };
+
+        // 🔹 Gebruiker inloggen
+        window.loginUser = async function() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                alert('Inloggen succesvol!');
+            } catch (error) {
+                alert('Fout bij inloggen: ' + error.message);
+            }
+        };
+
+        // 🔹 Gebruiker uitloggen
+        window.logoutUser = async function() {
+            try {
+                await signOut(auth);
+                alert('Uitgelogd!');
+            } catch (error) {
+                alert('Fout bij uitloggen: ' + error.message);
+            }
+        };
+
+        // 🔹 Laad de database bij inloggen
+        window.onload = function() {
+            loadDatabase();
+        };
 
         // 🔹 Database laden en tonen
         async function loadDatabase() {
@@ -53,27 +96,8 @@
             });
         }
 
-        // 🔹 Nieuw record toevoegen
-        window.addRecord = async function () {
-            let name = document.getElementById('name').value;
-            let description = document.getElementById('description').value;
-            let link = document.getElementById('link').value;
-
-            if (name && description && link) {
-                await addDoc(collection(db, "records"), {
-                    name: name,
-                    description: description,
-                    link: link
-                });
-                document.getElementById('name').value = '';
-                document.getElementById('description').value = '';
-                document.getElementById('link').value = '';
-                loadDatabase();
-            }
-        };
-
         // 🔹 Record bewerken
-        window.editRecord = async function (id) {
+        window.editRecord = async function(id) {
             let newName = prompt("Nieuwe naam:");
             let newDescription = prompt("Nieuwe beschrijving:");
             let newLink = prompt("Nieuwe link:");
@@ -90,13 +114,13 @@
         };
 
         // 🔹 Record verwijderen
-        window.deleteRecord = async function (id) {
+        window.deleteRecord = async function(id) {
             await deleteDoc(doc(db, "records", id));
             loadDatabase();
         };
 
         // 🔹 Zoekfunctie
-        window.searchRecords = async function () {
+        window.searchRecords = async function() {
             let query = document.getElementById('search').value.toLowerCase();
             const querySnapshot = await getDocs(collection(db, "records"));
             let filteredData = [];
@@ -111,25 +135,33 @@
             });
             displayRecords(filteredData);
         };
-
-        // 🔹 Laad database bij het openen van de pagina
-        window.onload = loadDatabase;
     </script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        input, button { margin: 5px; padding: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-        a { color: blue; text-decoration: none; }
-    </style>
 </head>
 <body>
-    <h2>Firebase Database</h2>
+    <h2>Firebase E-mail Login</h2>
+
+    <!-- Registratieformulier -->
+    <h3>Registreren</h3>
+    <input type="email" id="register-email" placeholder="E-mail" required>
+    <input type="password" id="register-password" placeholder="Wachtwoord" required>
+    <button onclick="registerUser()">Registreren</button>
+
+    <!-- Inlogformulier -->
+    <h3>Inloggen</h3>
+    <input type="email" id="login-email" placeholder="E-mail" required>
+    <input type="password" id="login-password" placeholder="Wachtwoord" required>
+    <button onclick="loginUser()">Inloggen</button>
+
+    <!-- Uitloggen -->
+    <button onclick="logoutUser()">Uitloggen</button>
+
+    <h3>Zoek, voeg toe en beheer records</h3>
     <input type="text" id="search" placeholder="Zoek..." onkeyup="searchRecords()">
     <input type="text" id="name" placeholder="Naam">
     <input type="text" id="description" placeholder="Beschrijving">
     <input type="text" id="link" placeholder="Link (https://...)">
     <button onclick="addRecord()">Toevoegen</button>
+    
     <table>
         <thead>
             <tr>
@@ -143,4 +175,5 @@
     </table>
 </body>
 </html>
+
 
