@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase E-mail Login</title>
+    <title>Bookmark Database</title>
     <script type="module">
         // 🔹 Firebase SDK importeren
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -24,19 +24,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-
-        // 🔹 Gebruiker registreren
-        window.registerUser = async function() {
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                alert('Registratie succesvol!');
-            } catch (error) {
-                alert('Fout bij registratie: ' + error.message);
-            }
-        };
 
         // 🔹 Gebruiker inloggen
         window.loginUser = async function() {
@@ -139,12 +126,6 @@
 </head>
 <body>
     <h2>Firebase E-mail Login</h2>
-
-    <!-- Registratieformulier -->
-    <h3>Registreren</h3>
-    <input type="email" id="register-email" placeholder="E-mail" required>
-    <input type="password" id="register-password" placeholder="Wachtwoord" required>
-    <button onclick="registerUser()">Registreren</button>
 
     <!-- Inlogformulier -->
     <h3>Inloggen</h3>
