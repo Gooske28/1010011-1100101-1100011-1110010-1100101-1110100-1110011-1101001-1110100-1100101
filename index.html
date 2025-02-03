@@ -1,106 +1,146 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<link rel="icon" href="Data.png" type="image/png">
     <meta charset="UTF-8">
-    <meta name="author" content="Heleli Maes">
-    <meta name="description" content="Free minidatabase">
-    <meta name="keywords" content="SS">
-    <meta http-equiv="refresh" content="300">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecretSite</title>
+    <title>Firebase Database</title>
+    <script type="module">
+        // 🔹 Firebase SDK importeren
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <!--Google tag-->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-H47LW534FS"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+        // 🔹 Firebase-configuratie (VERVANG MET JE EIGEN CONFIG!)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBb1I4awMXcV3Z6IttlDK6jBXY6XYcsU6I",
+            authDomain: "timssfoms.firebaseapp.com",
+            projectId: "timssfoms",
+            storageBucket: "timssfoms.firebasestorage.app",
+            messagingSenderId: "30802637926",
+            appId: "1:30802637926:web:9fbd24b77d5dbc06b1a9a7"
+        };
 
-  gtag('config', 'G-H47LW534FS');
-</script>
+        // 🔹 Firebase initialiseren
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  <!--Kleur en stijl van de links-->  
-  <style>
-    a:link {
-      color: aquamarine;
-      background-color: transparent;
-      text-decoration: none;
-    }
-    a:visited {
-      color: cyan;
-      background-color: transparent;
-      text-decoration: underline;
-    }
-    a:active {
-      color: gold;
-      background-color: transparent;
-      text-decoration: underline;
-    }
-  </style>  
+        // 🔹 Database laden en tonen
+        async function loadDatabase() {
+            const querySnapshot = await getDocs(collection(db, "records"));
+            let data = [];
+            querySnapshot.forEach((doc) => {
+                let item = doc.data();
+                item.id = doc.id;
+                data.push(item);
+            });
+            displayRecords(data);
+        }
+
+        // 🔹 Records tonen in de tabel
+        function displayRecords(data) {
+            let table = document.getElementById('database');
+            table.innerHTML = '';
+            data.forEach((item) => {
+                let row = `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.description}</td>
+                    <td><a href="${item.link}" target="_blank">${item.link}</a></td>
+                    <td>
+                        <button onclick="editRecord('${item.id}')">Bewerken</button>
+                        <button onclick="deleteRecord('${item.id}')">Verwijderen</button>
+                    </td>
+                </tr>`;
+                table.innerHTML += row;
+            });
+        }
+
+        // 🔹 Nieuw record toevoegen
+        window.addRecord = async function () {
+            let name = document.getElementById('name').value;
+            let description = document.getElementById('description').value;
+            let link = document.getElementById('link').value;
+
+            if (name && description && link) {
+                await addDoc(collection(db, "records"), {
+                    name: name,
+                    description: description,
+                    link: link
+                });
+                document.getElementById('name').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('link').value = '';
+                loadDatabase();
+            }
+        };
+
+        // 🔹 Record bewerken
+        window.editRecord = async function (id) {
+            let newName = prompt("Nieuwe naam:");
+            let newDescription = prompt("Nieuwe beschrijving:");
+            let newLink = prompt("Nieuwe link:");
+
+            if (newName !== null && newDescription !== null && newLink !== null) {
+                const recordRef = doc(db, "records", id);
+                await updateDoc(recordRef, {
+                    name: newName,
+                    description: newDescription,
+                    link: newLink
+                });
+                loadDatabase();
+            }
+        };
+
+        // 🔹 Record verwijderen
+        window.deleteRecord = async function (id) {
+            await deleteDoc(doc(db, "records", id));
+            loadDatabase();
+        };
+
+        // 🔹 Zoekfunctie
+        window.searchRecords = async function () {
+            let query = document.getElementById('search').value.toLowerCase();
+            const querySnapshot = await getDocs(collection(db, "records"));
+            let filteredData = [];
+            querySnapshot.forEach((doc) => {
+                let item = doc.data();
+                item.id = doc.id;
+                if (item.name.toLowerCase().includes(query) || 
+                    item.description.toLowerCase().includes(query) || 
+                    item.link.toLowerCase().includes(query)) {
+                    filteredData.push(item);
+                }
+            });
+            displayRecords(filteredData);
+        };
+
+        // 🔹 Laad database bij het openen van de pagina
+        window.onload = loadDatabase;
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { margin: 5px; padding: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        a { color: blue; text-decoration: none; }
+    </style>
 </head>
-    
-<!--Kleur en stijl van de pagina + titel en inleiding-->
-<body style="background-color: black; color: azure;">
-    <h1 style="text-align: center; border:2px solid darkcyan;">Welcome back boss!</h1>
-    <h3 style="text-align: center;">Pick up where you left off.</h3>
-
-  <table style="width:100%; text-align:center">
-  <tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Description</th>
-    <th>Link</th>
-  </tr>
-  <tr>
-    <td>00001</td>
-    <td>Geneanet</td>
-    <td>Stamboom van mij op Geneanet.</td>
-    <td><a href="https://gw.geneanet.org/gooske_w" target="_blank">Geneanet</a></td>
-  </tr>
-  <tr>
-      <td>00002</td>
-      <td>Tetris</td>
-      <td>Goede Tetris om online te spelen</td>
-      <td><a href="https://tetris.com/play-tetris" target="_blank">Tetris</a></td>
-  </tr>
-  <tr>
-      <td>00003</td>
-      <td>Wereldreizigers</td>
-      <td>Landen waar je geweest bent bijhouden</td>
-      <td><a href="https://www.veeronline.nl/beheer.php" target="_blank">Wereldreizigers</a></td>
-  </tr>
-  <tr>
-      <td>00004</td>
-      <td>ASCII</td>
-      <td>Tekst naar ASCII(streepsjeskunst)</td>
-      <td><a href="https://www.asciiart.eu/text-to-ascii-art" target="_blank">ASCII</a></td>
-  </tr>
-  <tr>
-      <td>00005</td>
-      <td>Watch 7</td>
-      <td>De Galaxy Watch 7(40mm, Bluetooth)</td>
-      <td><a href="https://www.samsung.com/be/watches/galaxy-watch/galaxy-watch7-40mm-green-bluetooth-sm-l300nzgaeub/#benefits" target="_blank">Watch 7</a></td>
-  </tr>
-  <tr>
-      <td>00006</td>
-      <td>3D Print</td>
-      <td>50 coole dingen om te 3D printen</td>
-      <td><a href="https://all3dp.com/1/useful-cool-things-3d-print-ideas-3d-printer-projects-stuff/" target="_blank">3D Print</a></td>
-  </tr>
-  <tr>
-      <td>00007</td>
-      <td>MARTIO</td>
-      <td>Website met links naar handige websites</td>
-      <td><a href="https://gooske28.github.io/MARTIO/" target="_blank">MARTIO</a></td>
-  </tr>
-  <tr>
-      <td>00008</td>
-      <td>SmartThings Find</td>
-      <td>Samsung GSM terugvinden en uitschakelen</td>
-      <td><a href="https://smartthingsfind.samsung.com/login" target="_blank">SmartThings Find</a></td>
-  </tr>    
+<body>
+    <h2>Firebase Database</h2>
+    <input type="text" id="search" placeholder="Zoek..." onkeyup="searchRecords()">
+    <input type="text" id="name" placeholder="Naam">
+    <input type="text" id="description" placeholder="Beschrijving">
+    <input type="text" id="link" placeholder="Link (https://...)">
+    <button onclick="addRecord()">Toevoegen</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Naam</th>
+                <th>Beschrijving</th>
+                <th>Link</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody id="database"></tbody>
+    </table>
 </body>
-</html> 
-
+</html>
 
